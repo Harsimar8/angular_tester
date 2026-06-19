@@ -1,0 +1,14 @@
+.layout{
+  display:grid;
+  grid-template-columns:300px 1fr;
+  height:80vh;
+}
+
+.left-panel{
+  border-right:1px solid #ccc;
+  overflow:auto;
+}
+
+.center-panel{
+  padding:10px;
+}
