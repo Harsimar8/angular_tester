@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UploadService, UploadedFile } from '../../core/services/upload';
+import { UploadService } from '../../core/services/upload';
 
 @Component({
   selector: 'app-upload-folder',
@@ -12,21 +12,28 @@ export class UploadFolderComponent {
 
   constructor(private uploadService: UploadService) {}
 
-  onFolderSelected(event: any) {
+  async onFolderSelected(event: any) {
 
-  const files: any[] = [];
+    const fileList: FileList = event.target.files;
+    const files: any[] = [];
 
-  for (let file of event.target.files) {
-    files.push({
-      name: file.name,
-      file: file
-    });
+    for (let i = 0; i < fileList.length; i++) {
+
+      const file = fileList.item(i);
+
+      if (file) {
+
+        const content = await file.text(); // IMPORTANT
+
+        files.push({
+          name: file.name,
+          content: content
+        });
+      }
+    }
+
+    console.log("UPLOAD TRIGGERED", files);
+
+    this.uploadService.setFiles(files);
   }
-
-  // ✅ ADD HERE
-  console.log("UPLOAD TRIGGERED");
-  console.log(files);
-
-  this.uploadService.setFiles(files);
-}
 }

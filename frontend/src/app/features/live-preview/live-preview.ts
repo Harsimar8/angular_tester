@@ -1,10 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  ViewChild,
-  AfterViewInit
-} from '@angular/core';
-
+import { Component } from '@angular/core';
 import { PreviewService } from '../../core/services/preview';
 
 @Component({
@@ -12,26 +6,13 @@ import { PreviewService } from '../../core/services/preview';
   standalone: true,
   templateUrl: './live-preview.html'
 })
-export class LivePreviewComponent
-implements AfterViewInit {
+export class LivePreviewComponent {
 
-  @ViewChild('frame')
-  frame!: ElementRef<HTMLIFrameElement>;
+  html = '';
 
-  constructor(
-    private previewService: PreviewService
-  ) {}
-
-  ngAfterViewInit() {
-
-    this.previewService.html$
-      .subscribe(html => {
-
-        if (!this.frame) return;
-
-        this.frame.nativeElement.srcdoc =
-          html;
-
-      });
+  constructor(private previewService: PreviewService) {
+    this.previewService.html$.subscribe(html => {
+      this.html = html;
+    });
   }
 }

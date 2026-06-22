@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-import { UploadService, UploadedFile } from '../../core/services/upload';
-import { PreviewService } from '../../core/services/preview';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { UploadService } from '../../core/services/upload';
 
 @Component({
   selector: 'app-file-explorer',
@@ -12,34 +11,27 @@ import { PreviewService } from '../../core/services/preview';
 })
 export class FileExplorerComponent {
 
-  htmlFiles: UploadedFile[] = [];
+  htmlFiles: any[] = [];
+  selectedHtml: SafeHtml = '';
 
   constructor(
     private uploadService: UploadService,
-    private previewService: PreviewService
+    private sanitizer: DomSanitizer
   ) {
 
-    console.log("FILE EXPLORER LOADED");
-    this.uploadService.files$
-      .subscribe((files: UploadedFile[]) => {
-
-
-      console.log("RECEIVED IN FILE EXPLORER:", files);
-        console.log("FILES FROM SERVICE:", files); // DEBUG
-
-        this.htmlFiles = files.filter(f =>
-          f.name?.endsWith('.html')
-        );
-      });
+    this.uploadService.files$.subscribe(files => {
+      this.htmlFiles = files.filter(f =>
+        f.name?.toLowerCase().endsWith('.html')
+      );
+    });
   }
 
-  openFile(file: UploadedFile): void {
-    const reader = new FileReader();
+  openFile(file: any) {
+    console.log("CLICKED FILE:", file);
 
-    reader.onload = () => {
-      this.previewService.setHtml(reader.result as string);
-    };
+    if (!file?.content) return;
 
-    reader.readAsText(file.file);
+    this.selectedHtml =
+      this.sanitizer.bypassSecurityTrustHtml(file.content);
   }
 }
