@@ -1,13 +1,9 @@
 <h3>HTML Files</h3>
 
-<div
-  *ngFor="let file of htmlFiles"
-  (click)="openFile(file)"
-  style="
-    cursor:pointer;
-    padding:10px;
-    border-bottom:1px solid #ddd;
-  "
->
+<div *ngFor="let file of htmlFiles"
+     (click)="openFile(file)"
+     style="cursor:pointer; padding:10px; border-bottom:1px solid #ddd">
+
   {{ file.name }}
+
 </div>

@@ -5,12 +5,12 @@ import {
   AfterViewInit
 } from '@angular/core';
 
-import { PreviewService } from '../../core/services/preview.service';
+import { PreviewService } from '../../core/services/preview';
 
 @Component({
   selector: 'app-live-preview',
   standalone: true,
-  templateUrl: './live-preview.component.html'
+  templateUrl: './live-preview.html'
 })
 export class LivePreviewComponent
 implements AfterViewInit {

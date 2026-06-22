@@ -1,22 +1,25 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { ProjectFile } from '../models/file.model';
+
+export interface UploadedFile {
+  name: string;
+  file: File;
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class UploadService {
 
-  private filesSubject = new BehaviorSubject<ProjectFile[]>([]);
+  private filesSubject = new BehaviorSubject<UploadedFile[]>([]);
 
   files$ = this.filesSubject.asObservable();
 
-  setFiles(files: ProjectFile[]) {
+  setFiles(files: UploadedFile[]) {
     this.filesSubject.next(files);
   }
 
   getFiles() {
     return this.filesSubject.value;
   }
-
 }
