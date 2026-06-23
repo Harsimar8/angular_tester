@@ -1,47 +1,45 @@
 <div class="control-panel">
 
-  <h3>Control Panel</h3>
+  <h3>Control Panel (Live Monitor)</h3>
 
-  <!-- 🔥 NEW: LIVE VALUES (ADDED ONLY, NOTHING REMOVED) -->
+  <!-- LIVE VALUES SECTION -->
   <div style="background:#d1ecf1; padding:10px; margin-bottom:10px;">
-    <b>LIVE VALUES</b>
+     <!-- LIVE VALUES SECTION -->
+<div style="background:#d1ecf1; padding:10px; margin-bottom:10px;">
+  <b>LIVE VALUES</b>
 
-    <div *ngIf="values && (values | json) !== '{}'">
+  <ng-container *ngIf="values | keyvalue as kv">
+    <div *ngIf="kv.length > 0; else noLiveValues">
       <pre>{{ values | json }}</pre>
     </div>
+  </ng-container>
 
-    <div *ngIf="!values || (values | json) === '{}'">
-      No live values yet
-    </div>
+  <ng-template #noLiveValues>
+    No live values yet
+  </ng-template>
+</div>
 
   </div>
 
-  <!-- 🔥 YOUR EXISTING DEBUG OUTPUT (UNCHANGED) -->
-  <div style="background: #fff3cd; padding: 10px; margin-bottom: 10px;">
-    <b>DEBUG:</b> Controls length = {{ controls?.length }}
-  </div>
-
-  <!-- RAW JSON VIEW (UNCHANGED) -->
-  <pre style="background:#eee; padding:10px;">
-{{ controls | json }}
-  </pre>
-
-  <!-- NORMAL UI (UNCHANGED) -->
+  <!-- CONTROLS LIST -->
   <div *ngFor="let c of controls"
        style="padding:10px; border:1px solid black; margin:5px">
 
     <b>{{ c.tag }}</b>
+
     <div>Type: {{ c.type }}</div>
+
     <div *ngIf="c.min">Min: {{ c.min }}</div>
     <div *ngIf="c.max">Max: {{ c.max }}</div>
+    <div *ngIf="c.step">Step: {{ c.step }}</div>
     <div *ngIf="c.default">Default: {{ c.default }}</div>
 
-
-    
-    <!-- 🔥 NEW: LIVE VALUE PER CONTROL (ADDED ONLY) -->
-    <div style="color:green; font-weight:bold;">
-      Live Value: {{ values?.[c.tag] ?? c.default }}
+    <!-- LIVE VALUE DISPLAY -->
+    <div style="color:green; font-weight:bold; margin-top:5px;">
+      Live Value:
+      {{ values?.[c.tag] !== undefined ? values[c.tag] : c.default }}
     </div>
 
-</div>
+  </div>
+
 </div>

@@ -1,7 +1,7 @@
-<div style="display: flex; height: 100vh;">
+<div style="display: flex; height: 100%;">
 
-  <!-- LEFT: file list -->
-  <div style="width: 30%; border-right: 1px solid #ddd; padding: 10px;">
+  <!-- FILE LIST -->
+  <div style="width: 35%; border-right: 1px solid #ddd; padding: 10px; overflow: auto;">
     
     <div *ngFor="let file of htmlFiles"
          (click)="openFile(file)"
@@ -11,8 +11,8 @@
 
   </div>
 
-  <!-- RIGHT: HTML preview -->
-  <div style="width: 70%; padding: 10px;">
+  <!-- PREVIEW -->
+  <div style="width: 65%; padding: 10px; overflow: hidden;">
 
     <iframe
       [srcdoc]="selectedHtml"

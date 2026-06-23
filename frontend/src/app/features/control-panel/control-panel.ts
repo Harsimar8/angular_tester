@@ -44,24 +44,22 @@ import { ControlService } from '../../core/services/control';
 export class ControlPanel {
 
   controls: any[] = [];
- values: any = {};
+   values: Record<string, any> = {};
 
-  constructor(private controlService: ControlService) {
+   constructor(private controlService: ControlService) {
 
   this.controlService.controls$
     .subscribe(data => {
-      console.log("CONTROLS IN UI:", data);
       this.controls = data || [];
     });
 
   this.controlService.values$
     .subscribe(values => {
-      console.log("LIVE VALUES IN UI:", values);
+      console.log('LIVE VALUES UPDATE:', values);
       this.values = values || {};
     });
 
-  // 🔥 NEW: restore if page reloads
- 
+  
 }
 
   onValueChange(tag: string, event: any) {

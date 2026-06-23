@@ -23,15 +23,16 @@ export class ControlService {
   private valuesSubject = new BehaviorSubject<any>({});
   values$ = this.valuesSubject.asObservable();
 
-  updateValue(tag: string, value: any) {
-    const current = this.valuesSubject.value;
+   updateValue(tag: string, value: any) {
 
-    this.valuesSubject.next({
-      ...current,
-      [tag]: value
-    });
+  console.log("🔥 UPDATE CALLED FROM UI:", tag, value);
 
-    console.log("🔥 LIVE VALUE:", tag, value);
-  }
+  const current = { ...this.valuesSubject.value };
+  current[tag] = Number(value);
+
+  this.valuesSubject.next(current);
+
+  console.log("🔥 NEW STATE:", current);
+}
 
 }
