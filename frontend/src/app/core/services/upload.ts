@@ -19,15 +19,19 @@ export class UploadService {
 
   files$ = this.filesSubject.asObservable();
 
-  setFiles(files: UploadedFile[]) {
+  setFiles(newFiles: UploadedFile[]) {
 
-    localStorage.setItem(
-      this.STORAGE_KEY,
-      JSON.stringify(files)
-    );
+  const currentFiles = this.filesSubject.value;
 
-    this.filesSubject.next(files);
-  }
+  const updatedFiles = [...currentFiles, ...newFiles];
+
+  localStorage.setItem(
+    this.STORAGE_KEY,
+    JSON.stringify(updatedFiles)
+  );
+
+  this.filesSubject.next(updatedFiles);
+}
 
   getFiles() {
     return this.filesSubject.value;
