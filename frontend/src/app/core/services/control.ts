@@ -6,14 +6,12 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class ControlService {
 
-  private controlsSubject =
-    new BehaviorSubject<any[]>([]);
+  private controlsSubject = new BehaviorSubject<any[]>([]);
 
-  controls$ =
-    this.controlsSubject.asObservable();
+  controls$ = this.controlsSubject.asObservable();
 
-  setControls(controls: any[]) {
-    this.controlsSubject.next(controls);
+  setControls(data: any[]) {
+    console.log("SERVICE RECEIVED:", data);
+    this.controlsSubject.next(data);
   }
-
 }

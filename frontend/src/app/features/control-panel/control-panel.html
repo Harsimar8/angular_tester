@@ -1,0 +1,27 @@
+<div class="control-panel">
+
+  <h3>Control Panel</h3>
+
+  <!-- 🔥 LIVE DEBUG OUTPUT -->
+  <div style="background: #fff3cd; padding: 10px; margin-bottom: 10px;">
+    <b>DEBUG:</b> Controls length = {{ controls?.length }}
+  </div>
+
+  <!-- RAW JSON VIEW (VERY IMPORTANT FOR DEBUGGING) -->
+  <pre style="background:#eee; padding:10px;">
+{{ controls | json }}
+  </pre>
+
+  <!-- NORMAL UI -->
+  <div *ngFor="let c of controls"
+       style="padding:10px; border:1px solid black; margin:5px">
+
+    <b>{{ c.tag }}</b>
+    <div>Type: {{ c.type }}</div>
+    <div *ngIf="c.min">Min: {{ c.min }}</div>
+    <div *ngIf="c.max">Max: {{ c.max }}</div>
+    <div *ngIf="c.default">Default: {{ c.default }}</div>
+
+  </div>
+
+</div>
