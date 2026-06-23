@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 
 import { UploadFolderComponent } from '../../features/upload-folder/upload-folder';
 import { FileExplorerComponent } from '../../features/file-explorer/file-explorer';
-import { LivePreviewComponent } from '../../features/live-preview/live-preview';
+// import { LivePreviewComponent } from '../../features/live-preview/live-preview';
 import { ControlPanel } from '../../features/control-panel/control-panel';
 
 @Component({
@@ -13,9 +13,9 @@ import { ControlPanel } from '../../features/control-panel/control-panel';
     CommonModule,
     UploadFolderComponent,
     FileExplorerComponent,
-    LivePreviewComponent,
     ControlPanel
   ],
-  templateUrl: './dashboard.html'
+  templateUrl: './dashboard.html',
+  styleUrls: ['./dashboard.css']
 })
 export class DashboardComponent {}

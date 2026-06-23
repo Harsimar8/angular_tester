@@ -2,42 +2,31 @@
 
   <h3>Control Panel (Live Monitor)</h3>
 
-  <!-- LIVE VALUES SECTION -->
-  <div style="background:#d1ecf1; padding:10px; margin-bottom:10px;">
-     <!-- LIVE VALUES SECTION -->
-<div style="background:#d1ecf1; padding:10px; margin-bottom:10px;">
-  <b>LIVE VALUES</b>
+  <!-- LIVE VALUES -->
+  <div style="background:#d1ecf1; padding:10px;">
+    <b>LIVE VALUES</b>
 
-  <ng-container *ngIf="values | keyvalue as kv">
-    <div *ngIf="kv.length > 0; else noLiveValues">
-      <pre>{{ values | json }}</pre>
+    <pre>{{ values | json }}</pre>
+
+    <div *ngIf="!values || Object.keys(values).length === 0">
+      No live values yet
     </div>
-  </ng-container>
-
-  <ng-template #noLiveValues>
-    No live values yet
-  </ng-template>
-</div>
-
   </div>
 
-  <!-- CONTROLS LIST -->
+  <!-- CONTROLS -->
   <div *ngFor="let c of controls"
        style="padding:10px; border:1px solid black; margin:5px">
 
     <b>{{ c.tag }}</b>
 
     <div>Type: {{ c.type }}</div>
+    <div>Min: {{ c.min }}</div>
+    <div>Max: {{ c.max }}</div>
+    <div>Step: {{ c.step }}</div>
+    <div>Default: {{ c.default }}</div>
 
-    <div *ngIf="c.min">Min: {{ c.min }}</div>
-    <div *ngIf="c.max">Max: {{ c.max }}</div>
-    <div *ngIf="c.step">Step: {{ c.step }}</div>
-    <div *ngIf="c.default">Default: {{ c.default }}</div>
-
-    <!-- LIVE VALUE DISPLAY -->
-    <div style="color:green; font-weight:bold; margin-top:5px;">
-      Live Value:
-      {{ values?.[c.tag] !== undefined ? values[c.tag] : c.default }}
+    <div style="color:green;font-weight:bold;">
+      Live Value: {{ values[c.tag] ?? c.default }}
     </div>
 
   </div>
