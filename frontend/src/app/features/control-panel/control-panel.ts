@@ -1,3 +1,35 @@
+// import { Component } from '@angular/core';
+// import { CommonModule } from '@angular/common';
+// import { ControlService } from '../../core/services/control';
+
+// @Component({
+//   selector: 'app-control-panel',
+//   standalone: true,
+//   imports: [CommonModule],
+//   templateUrl: './control-panel.html',
+//   styleUrl: './control-panel.css'
+// })
+
+// export class ControlPanel {
+
+//   controls: any[] = [];
+
+//   constructor(private controlService: ControlService) {
+
+//     this.controlService.controls$
+//       .subscribe(data => {
+
+//         console.log("🔥 CONTROL PANEL GOT DATA:", data);
+
+//         this.controls = [...(data || [])]; // IMPORTANT COPY
+
+//         console.log("🔥 ASSIGNED TO UI:", this.controls);
+
+//       });
+//   }
+// }
+
+
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlService } from '../../core/services/control';
@@ -12,20 +44,28 @@ import { ControlService } from '../../core/services/control';
 export class ControlPanel {
 
   controls: any[] = [];
+ values: any = {};
 
   constructor(private controlService: ControlService) {
 
-    console.log("CONTROL PANEL COMPONENT CREATED");
+  this.controlService.controls$
+    .subscribe(data => {
+      console.log("CONTROLS IN UI:", data);
+      this.controls = data || [];
+    });
 
-    this.controlService.controls$
-      .subscribe(data => {
+  this.controlService.values$
+    .subscribe(values => {
+      console.log("LIVE VALUES IN UI:", values);
+      this.values = values || {};
+    });
 
-        console.log("🔥 SERVICE DATA RECEIVED:", data);
+  // 🔥 NEW: restore if page reloads
+ 
+}
 
-        this.controls = data ? [...data] : [];
-
-        console.log("🔥 UI UPDATED DATA:", this.controls);
-
-      });
+  onValueChange(tag: string, event: any) {
+    const value = event.target.value;
+    this.controlService.updateValue(tag, value);
   }
 }
