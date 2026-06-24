@@ -1,34 +1,79 @@
 <div class="control-panel">
 
-  <h3>Control Panel (Live Monitor)</h3>
+  <!-- FUNCTIONING CONTROLS -->
+  <div class="section">
+    <h3>Functioning Controls</h3>
+    <div *ngIf="controls.length === 0" class="no-controls">
+      No controls detected. Upload an HTML file with <code>data-tag</code> attributes.
+    </div>
 
-  <!-- LIVE VALUES -->
-  <div style="background:#d1ecf1; padding:10px;">
-    <b>LIVE VALUES</b>
+    <div *ngFor="let c of controls" class="control-card">
+      <div class="control-header">
+        <span class="control-tag">&lt;{{ c.tag }}&gt;</span>
+        <span class="control-type">{{ c.type }}</span>
+      </div>
 
-    <pre>{{ values | json }}</pre>
+      <div class="control-props">
+        <span *ngIf="c.min !== ''">min={{ c.min }}</span>
+        <span *ngIf="c.max !== ''">max={{ c.max }}</span>
+        <span *ngIf="c.step !== ''">step={{ c.step }}</span>
+        <span *ngIf="c.default !== ''">default={{ c.default }}</span>
+      </div>
 
-    <div *ngIf="!values || Object.keys(values).length === 0">
-      No live values yet
+      <input
+        [type]="c.type || 'text'"
+        [min]="c.min || null"
+        [max]="c.max || null"
+        [step]="c.step || null"
+        [value]="values[c.tag] ?? c.default"
+        (input)="onValueChange(c.tag, $event)"
+        class="control-input"
+      />
+
+      <div class="live-value">
+        <b>Live:</b> {{ values[c.tag] ?? c.default }}
+      </div>
     </div>
   </div>
 
-  <!-- CONTROLS -->
-  <div *ngFor="let c of controls"
-       style="padding:10px; border:1px solid black; margin:5px">
-
-    <b>{{ c.tag }}</b>
-
-    <div>Type: {{ c.type }}</div>
-    <div>Min: {{ c.min }}</div>
-    <div>Max: {{ c.max }}</div>
-    <div>Step: {{ c.step }}</div>
-    <div>Default: {{ c.default }}</div>
-
-    <div style="color:green;font-weight:bold;">
-      Live Value: {{ values[c.tag] ?? c.default }}
+  <!-- CLICK INFO -->
+  <div class="section click-section" *ngIf="clickInfo">
+    <h4>Clicked Element</h4>
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-label">Tag:</span>
+        <span class="info-value">&lt;{{ clickInfo.tagName }}&gt;</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">ID:</span>
+        <span class="info-value">{{ clickInfo.id || 'none' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Name:</span>
+        <span class="info-value">{{ clickInfo.name || 'none' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Class:</span>
+        <span class="info-value">{{ clickInfo.className || 'none' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Rel (X, Y):</span>
+        <span class="info-value">{{ clickInfo.x }}, {{ clickInfo.y }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Client (X, Y):</span>
+        <span class="info-value">{{ clickInfo.clientX }}, {{ clickInfo.clientY }}</span>
+      </div>
     </div>
-
+    <div class="attributes-section" *ngIf="clickInfo.attributes && clickInfo.attributes.length > 0">
+      <h5>Attributes</h5>
+      <table class="attr-table">
+        <tr *ngFor="let attr of clickInfo.attributes">
+          <td class="attr-name">{{ attr.name }}</td>
+          <td class="attr-value">{{ attr.value }}</td>
+        </tr>
+      </table>
+    </div>
   </div>
 
 </div>

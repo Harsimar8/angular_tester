@@ -1,5 +1,9 @@
-<input
-  type="file"
-  multiple
-  (change)="onFolderSelected($event)"
->
+<label class="upload-label">
+  Upload HTML Files
+  <input
+    type="file"
+    multiple
+    (change)="onFolderSelected($event)"
+    accept=".html"
+  >
+</label>

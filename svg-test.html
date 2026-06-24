@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SVG Inspector Studio</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+      background: #0f1117;
+      color: #e0e0e0;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ===== LEFT PANEL ===== */
+    #left-panel {
+      width: 300px;
+      min-width: 300px;
+      background: #1a1d27;
+      border-right: 1px solid #2a2d3a;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #panel-header {
+      padding: 18px 20px;
+      background: #141722;
+      border-bottom: 1px solid #2a2d3a;
+    }
+    #panel-header h2 {
+      font-size: 15px;
+      color: #fff;
+      letter-spacing: 0.4px;
+    }
+    #panel-header p {
+      font-size: 11px;
+      color: #777;
+      margin-top: 3px;
+    }
+
+    #controls-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px;
+    }
+    #controls-scroll::-webkit-scrollbar { width: 5px; }
+    #controls-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+    .ctrl-group {
+      margin-bottom: 18px;
+    }
+    .ctrl-group-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #666;
+      margin-bottom: 8px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid #252836;
+    }
+
+    .ctrl-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 0;
+    }
+    .ctrl-label {
+      font-size: 12.5px;
+      color: #bbb;
+    }
+
+    /* Toggle switch */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 38px;
+      height: 20px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #333;
+      border-radius: 20px;
+      transition: 0.25s;
+    }
+    .slider::before {
+      content: "";
+      position: absolute;
+      height: 14px; width: 14px;
+      left: 3px; bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: 0.25s;
+    }
+    input:checked + .slider { background: #4A90D9; }
+    input:checked + .slider::before { transform: translateX(18px); }
+
+    /* Range slider */
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 130px;
+      height: 4px;
+      background: #333;
+      border-radius: 4px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #4A90D9;
+      cursor: pointer;
+    }
+
+    /* Color input */
+    input[type="color"] {
+      -webkit-appearance: none;
+      border: 1px solid #333;
+      border-radius: 4px;
+      width: 32px; height: 22px;
+      cursor: pointer;
+      background: transparent;
+      padding: 1px;
+    }
+
+    /* Select */
+    .ctrl-select {
+      background: #252836;
+      color: #ddd;
+      border: 1px solid #333;
+      border-radius: 5px;
+      padding: 4px 8px;
+      font-size: 12px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* Status badge */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .badge-on  { background: #1e3a2f; color: #4ade80; }
+    .badge-off { background: #3a1e1e; color: #f87171; }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid #252836;
+      margin: 14px 0;
+    }
+
+    /* ===== CENTER PANEL ===== */
+    #center-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #top-bar {
+      background: #141722;
+      padding: 10px 22px;
+      border-bottom: 1px solid #2a2d3a;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    #top-bar h1 {
+      font-size: 14px;
+      color: #fff;
+      font-weight: 600;
+    }
+    #top-bar .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    #svg-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      overflow: auto;
+      background:
+        radial-gradient(circle at 20% 30%, #1a1d2e 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, #1e1a2e 0%, transparent 50%),
+        #0f1117;
+    }
+
+    #svg-wrapper {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      position: relative;
+      max-width: 100%;
+      max-height: 100%;
+    }
+    #svg-wrapper svg {
+      display: block;
+      border-radius: 6px;
+      max-width: 820px;
+      width: 100%;
+      height: auto;
+    }
+
+    /* Hover highlight */
+    #svg-wrapper svg *:hover {
+      outline: 1.5px solid #FFD93D;
+      outline-offset: 1px;
+      cursor: crosshair;
+    }
+
+    /* ===== BOTTOM TOOLTIP BAR ===== */
+    #tooltip-bar {
+      background: #141722;
+      border-top: 1px solid #2a2d3a;
+      min-height: 90px;
+      max-height: 160px;
+      overflow-y: auto;
+      padding: 10px 22px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 12px;
+    }
+    #tooltip-bar .tip-title {
+      color: #4A90D9;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .attr-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 3px;
+    }
+    .attr-key {
+      color: #7dd3fc;
+    }
+    .attr-val {
+      color: #fde68a;
+    }
+    .attr-tag {
+      color: #4ade80;
+    }
+    .attr-id {
+      color: #f87171;
+      font-weight: bold;
+    }
+    .no-hover {
+      color: #555;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== LEFT PANEL ==================== -->
+  <div id="left-panel">
+    <div id="panel-header">
+      <h2>⚡ Control Panel</h2>
+      <p>Live SVG controls — changes reflect instantly</p>
+    </div>
+    <div id="controls-scroll">
+
+      <!-- LIGHTS -->
+      <div class="ctrl-group">
+        <div class="ctrl-group-title">💡 Lights</div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Ceiling Light</span>
+          <label class="switch">
+            <input type="checkbox" id="ctrl-light1" checked onchange="updateLights()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Lamp</span>
+          <label class="switch">
+            <input type="checkbox" id="ctrl-light2" checked onchange="updateLights()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="ctrl-row">
+          <span class="ctrl-label">Desk Lamp</span>
+          <label class="switch">
+            <input type="checkbox" id="ctrl-light3" onchange="updateLights()">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div id="light-status" style="margin-top:6px;font-size:11px;color:#888;"></div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ROOM SETTINGS -->
+      <div class="ctrl-group">
+        <div class="ctrl-group-title">🏠 Room Settings</div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Window</span>
+          <label class="switch">
+            <input type="checkbox" id="ctrl-window" checked onchange="updateRoom()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Curtain</span>
+          <label class="switch">
+            <input type="checkbox" id="ctrl-curtain" checked onchange="updateRoom()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Plant</span>
+          <label class="switch">
+            <input type="checkbox" id="ctrl-plant" checked onchange="updateRoom()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Picture Frame</span>
+          <label class="switch">
+            <input type="checkbox" id="ctrl-picture" checked onchange="updateRoom()">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- APPEARANCE -->
+      <div class="ctrl-group">
+        <div class="ctrl-group-title">🎨 Appearance</div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Wall Color</span>
+          <input type="color" id="ctrl-wall-color" value="#e8d5b7" onchange="updateAppearance()">
+        </div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Floor Color</span>
+          <input type="color" id="ctrl-floor-color" value="#8B5E3C" onchange="updateAppearance()">
+        </div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Ceiling Color</span>
+          <input type="color" id="ctrl-ceil-color" value="#f5f0e8" onchange="updateAppearance()">
+        </div>
+
+        <div class="ctrl-row">
+          <span class="ctrl-label">Time of Day</span>
+          <select class="ctrl-select" id="ctrl-time" onchange="updateTime()">
+            <option value="day">☀️ Day</option>
+            <option value="sunset">🌅 Sunset</option>
+            <option value="night">🌙 Night</option>
+          </select>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="ctrl-group">
+        <div class="ctrl-group-title">ℹ️ Info</div>
+        <p style="font-size:11px;color:#666;line-height:1.6;">
+          Hover over any element in the SVG to see its <b style="color:#7dd3fc;">ID</b> and <b style="color:#fde68a;">attributes</b> displayed below the image.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== CENTER PANEL ==================== -->
+  <div id="center-panel">
+
+    <div id="top-bar">
+      <span class="dot"></span>
+      <h1>room.svg — Live Preview</h1>
+      <span style="margin-left:auto;font-size:11px;color:#555;">Interactive SVG Inspector</span>
+    </div>
+
+    <div id="svg-area">
+      <div id="svg-wrapper">
+        <svg id="main-svg" width="820" height="520" viewBox="0 0 820 520"
+             xmlns="http://www.w3.org/2000/svg"
+             onmousemove="showAttrs(evt)"
+             onmouseleave="clearAttrs()">
+
+          <defs>
+            <radialGradient id="bg-day" cx="50%" cy="40%" r="60%">
+              <stop offset="0%" stop-color="#87CEEB"/>
+              <stop offset="100%" stop-color="#c9e8f7"/>
+            </radialGradient>
+            <radialGradient id="bg-sunset" cx="50%" cy="70%" r="70%">
+              <stop offset="0%" stop-color="#FF8C42"/>
+              <stop offset="50%" stop-color="#E05E00"/>
+              <stop offset="100%" stop-color="#2a1040"/>
+            </radialGradient>
+            <radialGradient id="bg-night" cx="50%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#0d1b2a"/>
+              <stop offset="100%" stop-color="#020810"/>
+            </radialGradient>
+            <linearGradient id="wall-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" id="wall-stop1" stop-color="#e8d5b7"/>
+              <stop offset="100%" id="wall-stop2" stop-color="#d4c0a0"/>
+            </linearGradient>
+            <linearGradient id="floor-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" id="floor-stop1" stop-color="#8B5E3C"/>
+              <stop offset="100%" id="floor-stop2" stop-color="#6b3f22"/>
+            </linearGradient>
+            <linearGradient id="ceil-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" id="ceil-stop1" stop-color="#f5f0e8"/>
+              <stop offset="100%" id="ceil-stop2" stop-color="#e8e0d4"/>
+            </linearGradient>
+            <linearGradient id="light-cone1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#FFFDE7" stop-opacity="0.55"/>
+              <stop offset="100%" stop-color="#FFFDE7" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="light-cone2" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#FFF8E1" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#FFF8E1" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="window-sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#87CEEB" id="sky-stop1"/>
+              <stop offset="100%" stop-color="#b8e0f0" id="sky-stop2"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+              <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="shadow-text">
+              <feDropShadow dx="1" dy="1" stdDeviation="1" flood-color="#000" flood-opacity="0.3"/>
+            </filter>
+          </defs>
+
+          <!-- BACKGROUND (sky / outside) -->
+          <rect id="bg-sky" x="0" y="0" width="820" height="520" fill="url(#bg-day)"/>
+
+          <!-- STARS (night only) -->
+          <g id="stars" opacity="0">
+            <circle cx="60" cy="40" r="1.5" fill="#fff"/>
+            <circle cx="150" cy="25" r="1" fill="#fff"/>
+            <circle cx="280" cy="50" r="1.8" fill="#fff"/>
+            <circle cx="400" cy="30" r="1.2" fill="#fff"/>
+            <circle cx="550" cy="45" r="1.6" fill="#fff"/>
+            <circle cx="700" cy="20" r="1.3" fill="#fff"/>
+            <circle cx="760" cy="55" r="1" fill="#fff"/>
+            <circle cx="100" cy="70" r="1.1" fill="#fff"/>
+            <circle cx="350" cy="60" r="1.4" fill="#fff"/>
+            <circle cx="620" cy="35" r="1.7" fill="#fff"/>
+            <circle cx="480" cy="70" r="1" fill="#fff"/>
+          </g>
+
+          <!-- MOON (night) -->
+          <g id="moon-group" opacity="0">
+            <circle cx="680" cy="60" r="35" fill="#fefce8" filter="url(#glow)"/>
+            <circle cx="695" cy="50" r="30" fill="#0f1117"/>
+          </g>
+
+          <!-- SUN (day/sunset) -->
+          <circle id="sun" cx="650" cy="100" r="40" fill="#FFD93D" filter="url(#glow)" opacity="0.9">
+            <animate attributeName="cy" values="100;110;100" dur="6s" repeatCount="indefinite"/>
+          </circle>
+
+          <!-- CLOUDS -->
+          <g id="cloud1" opacity="0.8">
+            <ellipse cx="120" cy="80" rx="50" ry="18" fill="#fff"/>
+            <ellipse cx="90" cy="72" rx="28" ry="14" fill="#fff"/>
+            <ellipse cx="155" cy="75" rx="32" ry="13" fill="#fff"/>
+            <animateTransform attributeName="transform" type="translate" values="0,0;-30,0;0,0" dur="12s" repeatCount="indefinite"/>
+          </g>
+          <g id="cloud2" opacity="0.6">
+            <ellipse cx="450" cy="60" rx="60" ry="20" fill="#fff"/>
+            <ellipse cx="415" cy="52" rx="32" ry="15" fill="#fff"/>
+            <ellipse cx="490" cy="55" rx="38" ry="16" fill="#fff"/>
+            <animateTransform attributeName="transform" type="translate" values="0,0;25,0;0,0" dur="16s" repeatCount="indefinite"/>
+          </g>
+
+          <!-- WALL -->
+          <rect id="wall" x="0" y="140" width="820" height="280" fill="url(#wall-grad)"/>
+
+          <!-- WALL BASEBOARD -->
+          <rect id="baseboard" x="0" y="410" width="820" height="12" fill="#b09878" opacity="0.6"/>
+
+          <!-- FLOOR (perspective trapezoid) -->
+          <polygon id="floor" points="0,422 820,422 820,520 0,520" fill="url(#floor-grad)"/>
+          <!-- Floor boards -->
+          <line x1="0" y1="460" x2="820" y2="460" stroke="#6b3f22" stroke-width="1" opacity="0.3"/>
+          <line x1="0" y1="490" x2="820" y2="490" stroke="#6b3f22" stroke-width="1" opacity="0.3"/>
+
+          <!-- CEILING -->
+          <rect id="ceiling" x="0" y="0" width="820" height="140" fill="url(#ceil-grad)"/>
+
+          <!-- CEILING LIGHT (bulb holder + bulb) -->
+          <g id="ceiling-light">
+            <rect x="380" y="20" width="60" height="8" rx="3" fill="#555"/>
+            <ellipse cx="410" cy="75" rx="45" ry="22" id="bulb-glass" fill="#FFF9C4" opacity="0.85"/>
+            <ellipse cx="410" cy="72" rx="30" ry="12" fill="#fff" opacity="0.5"/>
+            <!-- Light cone -->
+            <polygon id="light-cone" points="365,75 455,75 510,420 310,420" fill="url(#light-cone1)" opacity="0.7"/>
+          </g>
+
+          <!-- WINDOW -->
+          <g id="window-group">
+            <rect id="window-outer" x="540" y="170" width="220" height="180" rx="6" fill="#5a3e28" stroke="#3d2a1a" stroke-width="6"/>
+            <rect id="window-glass" x="548" y="178" width="204" height="164" rx="3" fill="url(#window-sky)"/>
+            <!-- window cross bars -->
+            <rect x="636" y="178" width="8" height="164" fill="#5a3e28" rx="2"/>
+            <rect x="548" y="258" width="204" height="8" fill="#5a3e28" rx="2"/>
+            <!-- sun in window -->
+            <circle id="window-sun" cx="650" cy="220" r="20" fill="#FFF9C4" opacity="0.7"/>
+            <!-- reflection -->
+            <ellipse cx="620" cy="300" rx="30" ry="6" fill="#fff" opacity="0.15"/>
+          </g>
+
+          <!-- CURTAIN -->
+          <g id="curtain-left">
+            <path d="M 536 165 Q 525 260 535 355" stroke="#c0392b" stroke-width="18" fill="none" stroke-linecap="round"/>
+            <path d="M 536 165 Q 530 260 535 355" stroke="#e74c3c" stroke-width="10" fill="none" stroke-linecap="round"/>
+          </g>
+          <g id="curtain-right">
+            <path d="M 764 165 Q 775 260 765 355" stroke="#c0392b" stroke-width="18" fill="none" stroke-linecap="round"/>
+            <path d="M 764 165 Q 770 260 765 355" stroke="#e74c3c" stroke-width="10" fill="none" stroke-linecap="round"/>
+          </g>
+
+          <!-- LAMP (right side) -->
+          <g id="lamp-group">
+            <rect x="748" y="400" width="8" height="80" fill="#555" rx="2"/>
+            <ellipse cx="752" cy="400" rx="6" ry="3" fill="#444"/>
+            <path id="lamp-shade" d="M 720 400 Q 752 370 784 400 L 770 410 Q 752 390 734 410 Z" fill="#e67e22" opacity="0.9"/>
+            <ellipse id="lamp-bulb" cx="752" cy="406" rx="18" ry="5" fill="#FFF9C4" opacity="0.8"/>
+            <!-- lamp glow -->
+            <ellipse id="lamp-glow" cx="752" cy="420" rx="50" ry="70" fill="url(#light-cone2)" opacity="0.5"/>
+          </g>
+
+          <!-- PICTURE FRAME -->
+          <g id="picture-frame">
+            <rect x="95" y="175" width="150" height="110" rx="4" fill="#5a3e28" stroke="#3d2a1a" stroke-width="5"/>
+            <rect x="103" y="183" width="134" height="94" rx="2" fill="#87CEEB"/>
+            <!-- simple landscape in frame -->
+            <polygon points="103,240 150,210 180,230 220,205 237,240" fill="#4a7c59" opacity="0.8"/>
+            <circle cx="200" cy="205" r="12" fill="#FFD93D" opacity="0.8"/>
+            <rect x="103" y="240" width="134" height="37" fill="#6b8e4e" opacity="0.7"/>
+          </g>
+
+          <!-- PLANT -->
+          <g id="plant-group">
+            <rect x="72" y="395" width="34" height="40" rx="6" fill="#8B4513"/>
+            <ellipse cx="89" cy="408" rx="20" ry="8" fill="#A0522D" opacity="0.5"/>
+            <path d="M 89 395 Q 65 350 55 310" stroke="#2e7d32" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <path d="M 89 395 Q 110 340 120 300" stroke="#2e7d32" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <path d="M 89 395 Q 75 360 70 320" stroke="#388E3C" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <path d="M 89 395 Q 105 355 100 315" stroke="#388E3C" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+            <path d="M 89 395 Q 89 350 88 300" stroke="#43A047" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <ellipse cx="52" cy="308" rx="14" ry="8" fill="#2e7d32" transform="rotate(-30 52 308)"/>
+            <ellipse cx="122" cy="298" rx="14" ry="8" fill="#2e7d32" transform="rotate(30 122 298)"/>
+            <ellipse cx="68" cy="318" rx="12" ry="7" fill="#388E3C" transform="rotate(-20 68 318)"/>
+            <ellipse cx="102" cy="312" rx="12" ry="7" fill="#388E3C" transform="rotate(20 102 312)"/>
+            <ellipse cx="86" cy="298" rx="13" ry="8" fill="#43A047"/>
+          </g>
+
+          <!-- DESK -->
+          <g id="desk">
+            <rect x="60" y="440" width="340" height="14" rx="3" fill="#5D3A1A"/>
+            <rect x="80" y="454" width="16" height="60" fill="#5D3A1A" rx="2"/>
+            <rect x="360" y="454" width="16" height="60" fill="#5D3A1A" rx="2"/>
+          </g>
+
+          <!-- DESK LAMP -->
+          <g id="desk-lamp">
+            <rect x="260" y="390" width="10" height="50" fill="#555" rx="2"/>
+            <ellipse cx="265" cy="390" rx="8" ry="3" fill="#444"/>
+            <path id="desk-lamp-shade" d="M 240 390 Q 265 365 290 390 L 280 396 Q 265 378 250 396 Z" fill="#e74c3c" opacity="0.9"/>
+            <ellipse id="desk-lamp-bulb" cx="265" cy="395" rx="20" ry="5" fill="#FFF9C4" opacity="0.75"/>
+          </g>
+
+          <!-- CHAIR -->
+          <g id="chair">
+            <rect x="450" y="360" width="80" height="80" rx="8" fill="#555"/>
+            <rect x="440" y="350" width="100" height="18" rx="6" fill="#666"/>
+            <rect x="460" y="440" width="14" height="60" fill="#555" rx="3"/>
+            <rect x="506" y="440" width="14" height="60" fill="#555" rx="3"/>
+            <rect x="448" y="495" width="84" height="10" rx="4" fill="#444"/>
+          </g>
+
+          <!-- CARPET -->
+          <ellipse id="carpet" cx="490" cy="480" rx="120" ry="30" fill="#c0392b" opacity="0.3"/>
+          <ellipse cx="490" cy="480" rx="90" ry="22" fill="none" stroke="#a93226" stroke-width="2" opacity="0.4"/>
+          <ellipse cx="490" cy="480" rx="55" ry="14" fill="none" stroke="#a93226" stroke-width="1.5" opacity="0.3"/>
+
+          <!-- SMALL TABLE (near lamp) -->
+          <g id="side-table">
+            <rect x="700" y="370" width="80" height="10" rx="2" fill="#5D3A1A"/>
+            <rect x="708" y="380" width="10" height="50" fill="#5D3A1A" rx="2"/>
+            <rect x="762" y="380" width="10" height="50" fill="#5D3A1A" rx="2"/>
+          </g>
+
+          <!-- BOOK on side table -->
+          <g id="book">
+            <rect x="715" y="360" width="22" height="10" rx="1" fill="#2980b9" transform="rotate(-5 715 360)"/>
+            <rect x="720" y="357" width="22" height="10" rx="1" fill="#e74c3c" transform="rotate(3 720 357)"/>
+          </g>
+
+          <!-- RUG under desk -->
+          <ellipse cx="240" cy="500" rx="80" ry="18" fill="#8e44ad" opacity="0.25"/>
+          <ellipse cx="240" cy="500" rx="55" ry="12" fill="none" stroke="#8e44ad" stroke-width="1.5" opacity="0.3"/>
+
+          <!-- WALL TEXTURE LINES -->
+          <g opacity="0.04">
+            <line x1="0" y1="160" x2="820" y2="160" stroke="#000" stroke-width="0.5"/>
+            <line x1="0" y1="200" x2="820" y2="200" stroke="#000" stroke-width="0.5"/>
+            <line x1="0" y1="250" x2="820" y2="250" stroke="#000" stroke-width="0.5"/>
+            <line x1="0" y1="310" x2="820" y2="310" stroke="#000" stroke-width="0.5"/>
+            <line x1="0" y1="370" x2="820" y2="370" stroke="#000" stroke-width="0.5"/>
+          </g>
+
+          <!-- SIGNATURE -->
+          <text x="412" y="515" text-anchor="middle" font-family="Georgia, serif" font-size="10" fill="#999" opacity="0.5">✦ SVG Inspector Studio ✦</text>
+
+        </svg>
+      </div>
+    </div>
+
+    <!-- ===== BOTTOM ATTRIBUTE BAR ===== -->
+    <div id="tooltip-bar">
+      <div class="tip-title">🔍 Element Inspector</div>
+      <div id="attr-content">
+        <span class="no-hover">Hover over any SVG element to see its ID, tag, and attributes here…</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== SCRIPTS ==================== -->
+  <script>
+    /* ----- HOVER ATTRIBUTE INSPECTOR ----- */
+    function showAttrs(evt) {
+      const el = evt.target;
+      const box = document.getElementById('attr-content');
+      if (!el || !el.id) {
+        box.innerHTML = `<span class="no-hover">&lt;<span class="attr-tag">${el.tagName.toLowerCase()}</span>&gt; — no id attribute</span>`;
+        return;
+      }
+      let html = `<div class="attr-row"><span class="attr-id">#${el.id}</span> <span class="attr-tag">&lt;${el.tagName.toLowerCase()}&gt;</span></div>`;
+      for (const [k, v] of Object.entries(el.attributes)) {
+        if (k === 'id') continue;
+        html += `<div class="attr-row"><span class="attr-key">${k}</span>=<span class="attr-val">"${v.value}"</span></div>`;
+      }
+      // also show inline styles
+      if (el.style && el.style.cssText) {
+        html += `<div class="attr-row" style="color:#a78bfa;">style="${el.style.cssText}"</div>`;
+      }
+      box.innerHTML = html;
+    }
+
+    function clearAttrs() {
+      document.getElementById('attr-content').innerHTML =
+        '<span class="no-hover">Hover over any SVG element to see its ID, tag, and attributes here…</span>';
+    }
+
+    /* ----- LIGHT CONTROLS ----- */
+    function updateLights() {
+      const l1 = document.getElementById('ctrl-light1').checked;
+      const l2 = document.getElementById('ctrl-light2').checked;
+      const l3 = document.getElementById('ctrl-light3').checked;
+
+      document.getElementById('bulb-glass').setAttribute('opacity', l1 ? '0.85' : '0.1');
+      document.getElementById('light-cone').setAttribute('opacity', l1 ? '0.7' : '0.05');
+
+      document.getElementById('lamp-shade').setAttribute('opacity', l2 ? '0.9' : '0.2');
+      document.getElementById('lamp-bulb').setAttribute('opacity', l2 ? '0.8' : '0.1');
+      document.getElementById('lamp-glow').setAttribute('opacity', l2 ? '0.5' : '0.02');
+
+      document.getElementById('desk-lamp-shade').setAttribute('opacity', l3 ? '0.9' : '0.2');
+      document.getElementById('desk-lamp-bulb').setAttribute('opacity', l3 ? '0.75' : '0.1');
+
+      const count = [l1, l2, l3].filter(Boolean).length;
+      const statusEl = document.getElementById('light-status');
+      statusEl.innerHTML = count === 0
+        ? '🔴 All lights <span class="badge badge-off">OFF</span>'
+        : count === 3
+          ? '🟢 All lights <span class="badge badge-on">ON</span>'
+          : `🟡 ${count}/3 lights <span class="badge badge-on">ON</span>`;
+    }
+
+    /* ----- ROOM TOGGLES ----- */
+    function updateRoom() {
+      document.getElementById('window-group').style.display    = document.getElementById('ctrl-window').checked ? '' : 'none';
+      document.getElementById('window-sky').setAttribute('fill',
+        document.getElementById('ctrl-window').checked ? 'url(#window-sky)' : '#333');
+      document.getElementById('curtain-left').style.display  = document.getElementById('ctrl-curtain').checked ? '' : 'none';
+      document.getElementById('curtain-right').style.display = document.getElementById('ctrl-curtain').checked ? '' : 'none';
+      document.getElementById('plant-group').style.display   = document.getElementById('ctrl-plant').checked ? '' : 'none';
+      document.getElementById('picture-frame').style.display = document.getElementById('ctrl-picture').checked ? '' : 'none';
+    }
+
+    /* ----- APPEARANCE ----- */
+    function updateAppearance() {
+      const wc = document.getElementById('ctrl-wall-color').value;
+      const fc = document.getElementById('ctrl-floor-color').value;
+      const cc = document.getElementById('ctrl-ceil-color').value;
+
+      document.getElementById('wall-stop1').setAttribute('stop-color', wc);
+      document.getElementById('wall-stop2').setAttribute('stop-color', adjustColor(wc, -25));
+
+      document.getElementById('floor-stop1').setAttribute('stop-color', fc);
+      document.getElementById('floor-stop2').setAttribute('stop-color', adjustColor(fc, -25));
+
+      document.getElementById('ceil-stop1').setAttribute('stop-color', cc);
+      document.getElementById('ceil-stop2').setAttribute('stop-color', adjustColor(cc, -15));
+    }
+
+    function adjustColor(hex, amount) {
+      let c = hex.replace('#', '');
+      let r = Math.max(0, Math.min(255, parseInt(c.substr(0,2),16) + amount));
+      let g = Math.max(0, Math.min(255, parseInt(c.substr(2,2),16) + amount));
+      let b = Math.max(0, Math.min(255, parseInt(c.substr(4,2),16) + amount));
+      return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+    }
+
+    /* ----- TIME OF DAY ----- */
+    function updateTime() {
+      const t = document.getElementById('ctrl-time').value;
+      const bg = document.getElementById('bg-sky');
+      const sun = document.getElementById('sun');
+      const moonGroup = document.getElementById('moon-group');
+      const stars = document.getElementById('stars');
+      const winSky1 = document.getElementById('sky-stop1');
+      const winSky2 = document.getElementById('sky-stop2');
+      const windowSun = document.getElementById('window-sun');
+
+      if (t === 'day') {
+        bg.setAttribute('fill', 'url(#bg-day)');
+        sun.setAttribute('fill', '#FFD93D'); sun.setAttribute('opacity', '0.9');
+        moonGroup.setAttribute('opacity', '0');
+        stars.setAttribute('opacity', '0');
+        winSky1.setAttribute('stop-color', '#87CEEB');
+        winSky2.setAttribute('stop-color', '#b8e0f0');
+        windowSun.setAttribute('opacity', '0.7');
+        document.getElementById('cloud1').setAttribute('opacity', '0.8');
+        document.getElementById('cloud2').setAttribute('opacity', '0.6');
+      } else if (t === 'sunset') {
+        bg.setAttribute('fill', 'url(#bg-sunset)');
+        sun.setAttribute('fill', '#FF4500'); sun.setAttribute('opacity', '0.7');
+        moonGroup.setAttribute('opacity', '0');
+        stars.setAttribute('opacity', '0');
+        winSky1.setAttribute('stop-color', '#FF8C42');
+        winSky2.setAttribute('stop-color', '#ff6b3520');
+        windowSun.setAttribute('opacity', '0.9');
+        document.getElementById('cloud1').setAttribute('opacity', '0.5');
+        document.getElementById('cloud2').setAttribute('opacity', '0.4');
+      } else {
+        bg.setAttribute('fill', 'url(#bg-night)');
+        sun.setAttribute('opacity', '0');
+        moonGroup.setAttribute('opacity', '1');
+        stars.setAttribute('opacity', '1');
+        winSky1.setAttribute('stop-color', '#0d1b2a');
+        winSky2.setAttribute('stop-color', '#050c14');
+        windowSun.setAttribute('opacity', '0.3');
+        document.getElementById('cloud1').setAttribute('opacity', '0.15');
+        document.getElementById('cloud2').setAttribute('opacity', '0.1');
+      }
+    }
+
+    /* init */
+    updateLights();
+    updateRoom();
+    updateTime();
+  </script>
+
+</body>
+</html>

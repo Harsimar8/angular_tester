@@ -13,6 +13,8 @@ export class ControlPanel {
   Object = Object;
   controls: any[] = [];
   values: Record<string, any> = {};
+  clickInfo: any = null;
+  hoverInfo: any = null;
 
   constructor(
     private controlService: ControlService,
@@ -26,13 +28,23 @@ export class ControlPanel {
 
     this.controlService.values$
       .subscribe(values => {
-
-        console.log("🔥 UI RECEIVED:", values);
-
-        this.values = structuredClone(values); // IMPORTANT
-        this.cd.detectChanges(); // 🔥 FORCE UI REFRESH
-
+        this.values = { ...values }
       });
 
+    this.controlService.clickInfo$
+      .subscribe(info => {
+        this.clickInfo = info;
+      });
+
+    this.controlService.hoverInfo$
+      .subscribe(info => {
+        this.hoverInfo = info;
+      });
+
+  }
+
+  onValueChange(tag: string, event: any) {
+    const value = event.target.value;
+    this.controlService.updateValue(tag, value);
   }
 }

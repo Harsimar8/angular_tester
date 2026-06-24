@@ -1,1 +1,13 @@
-<!-- <iframe [srcdoc]="html" width="100%" height="700"></iframe> -->
+<div class="live-preview">
+  <div class="preview-container" *ngIf="htmlContent">
+    <iframe
+      #previewFrame
+      [srcdoc]="htmlContent"
+      class="preview-iframe"
+      sandbox="allow-scripts">
+    </iframe>
+  </div>
+  <div *ngIf="!htmlContent" class="no-preview">
+    Upload an HTML file to see the preview
+  </div>
+</div>

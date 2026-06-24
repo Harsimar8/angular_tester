@@ -1,24 +1,16 @@
-<div style="display: flex; height: 100%; width: 100%; overflow: hidden;">
-
-  <!-- FILE LIST -->
-  <div style="width: 25%; overflow-y: auto; border-right: 1px solid #ddd; padding: 8px;">
-
-    <div *ngFor="let file of htmlFiles"
-         (click)="openFile(file)"
-         style="padding: 6px; cursor: pointer; border-bottom: 1px solid #eee; font-size: 13px;">
-      {{ file.name }}
+<div class="file-explorer">
+  <div class="file-list-section">
+    <h4>HTML Files</h4>
+    <div class="file-list">
+      <div *ngFor="let file of htmlFiles"
+           (click)="openFile(file)"
+           [class.active]="selectedFile === file"
+           class="file-item">
+        {{ file.name }}
+      </div>
+      <div *ngIf="htmlFiles.length === 0" class="no-files">
+        No HTML files uploaded yet
+      </div>
     </div>
-
   </div>
-
-  <!-- PREVIEW -->
-  <div style="width: 75%; overflow: hidden;">
-
-    <iframe
-      [srcdoc]="selectedHtml"
-      style="width: 100%; height: 100%; border: none; display: block;">
-    </iframe>
-
-  </div>
-
 </div>

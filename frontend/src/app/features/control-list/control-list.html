@@ -1,1 +1,50 @@
-<p>control-list works!</p>
+<div class="control-list">
+  <div class="section">
+    <h3>Element Inspector</h3>
+    
+    <div *ngIf="hoverInfo" class="hover-info">
+      <div class="attr-row">
+        <span class="attr-id" *ngIf="hoverInfo.id">#{{ hoverInfo.id }}</span>
+        <span class="attr-tag" *ngIf="hoverInfo.tagName">&lt;{{ hoverInfo.tagName }}&gt;</span>
+      </div>
+      
+      <div *ngFor="let attr of hoverInfo.attributes" class="attr-row-small">
+        <span class="attr-key">{{ attr.name }}</span>=<span class="attr-val">"{{ attr.value }}"</span>
+      </div>
+
+      <div *ngIf="hoverInfo.style && hoverInfo.style.cssText" class="attr-row-small" style="color:#a78bfa;">
+        style="{{ hoverInfo.style.cssText }}"
+      </div>
+    </div>
+
+    <div *ngIf="!hoverInfo" class="no-hover">
+      Hover over any element in the SVG to see its ID and attributes
+    </div>
+  </div>
+
+  <div class="section click-section" *ngIf="clickInfo">
+    <h4>Clicked Element</h4>
+    <div class="info-grid">
+      <div class="info-item">
+        <span class="info-label">Tag:</span>
+        <span class="info-value">&lt;{{ clickInfo.tagName }}&gt;</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">ID:</span>
+        <span class="info-value">{{ clickInfo.id || 'none' }}</span>
+      </div>
+      <div class="info-item">
+        <span class="info-label">Class:</span>
+        <span class="info-value">{{ clickInfo.className || 'none' }}</span>
+      </div>
+    </div>
+    <div class="attributes-section" *ngIf="clickInfo.attributes && clickInfo.attributes.length > 0">
+      <table class="attr-table">
+        <tr *ngFor="let attr of clickInfo.attributes">
+          <td class="attr-name">{{ attr.name }}</td>
+          <td class="attr-value">{{ attr.value }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>

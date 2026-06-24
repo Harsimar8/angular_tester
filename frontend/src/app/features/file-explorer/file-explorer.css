@@ -1,5 +1,51 @@
-:host {
-  display: block;
+.file-explorer {
+  display: flex;
+  flex-direction: column;
   height: 100%;
   width: 100%;
+  overflow: hidden;
+}
+
+.file-list-section {
+  flex: 0 0 auto;
+  padding: 12px;
+}
+
+.file-list-section h4 {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  color: #4A90D9;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.file-list {
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+
+.file-item {
+  padding: 8px 10px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  font-size: 13px;
+  border-radius: 4px;
+  color: #e0e0e0;
+}
+
+.file-item:hover {
+  background: #252836;
+}
+
+.file-item.active {
+  background: #4A90D9;
+  color: #fff;
+  font-weight: 600;
+}
+
+.no-files {
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
+  padding: 12px;
 }

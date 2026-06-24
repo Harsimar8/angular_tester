@@ -6,7 +6,8 @@ import { UploadService } from '../../core/services/upload';
   selector: 'app-upload-folder',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './upload-folder.html'
+  templateUrl: './upload-folder.html',
+  styleUrls: ['./upload-folder.css']
 })
 export class UploadFolderComponent {
 

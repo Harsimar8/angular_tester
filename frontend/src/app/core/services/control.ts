@@ -23,16 +23,38 @@ export class ControlService {
   private valuesSubject = new BehaviorSubject<any>({});
   values$ = this.valuesSubject.asObservable();
 
-   updateValue(tag: string, value: any) {
+  updateValue(tag: string, value: any) {
 
-  console.log("🔥 UPDATE CALLED FROM UI:", tag, value);
+    console.log("🔥 UPDATE CALLED:", tag, value);
 
-  const current = { ...this.valuesSubject.value };
-  current[tag] = Number(value);
+    const current = { ...this.valuesSubject.value };
 
-  this.valuesSubject.next(current);
+    // ⚠️ ALWAYS use string key safely
+    current[String(tag)] = value;
 
-  console.log("🔥 NEW STATE:", current);
-}
+    this.valuesSubject.next(current);
+
+    console.log("🔥 NEW STATE:", current);
+  }
+
+  // ========================
+  // CLICK INFO
+  // ========================
+  private clickInfoSubject = new BehaviorSubject<any>(null);
+  clickInfo$ = this.clickInfoSubject.asObservable();
+
+  updateClickInfo(info: any) {
+    this.clickInfoSubject.next(info);
+  }
+
+  // ========================
+  // HOVER INFO
+  // ========================
+  private hoverInfoSubject = new BehaviorSubject<any>(null);
+  hoverInfo$ = this.hoverInfoSubject.asObservable();
+
+  updateHoverInfo(info: any) {
+    this.hoverInfoSubject.next(info);
+  }
 
 }

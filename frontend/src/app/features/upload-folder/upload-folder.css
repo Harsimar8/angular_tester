@@ -1,0 +1,14 @@
+.upload-label {
+  display: inline-block;
+  padding: 8px 12px;
+  background: #4A90D9;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin: 8px;
+}
+
+.upload-label input {
+  display: none;
+}

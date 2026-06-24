@@ -41,4 +41,11 @@ export class UploadService {
     const data = localStorage.getItem(this.STORAGE_KEY);
     return data ? JSON.parse(data) : [];
   }
+
+  private selectedFileSubject = new BehaviorSubject<UploadedFile | null>(null);
+  selectedFile$ = this.selectedFileSubject.asObservable();
+
+  selectFile(file: UploadedFile) {
+    this.selectedFileSubject.next(file);
+  }
 }
